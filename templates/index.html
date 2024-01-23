@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <title>WeatherApp</title>
+
+    <style>
+        .autocomplete-list {
+            position: absolute;
+            z-index: 1000;
+            margin-top: 2px;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        .autocomplete-item {
+            padding: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href='' style="padding-left: 20px">
+            <img src="{% static '/images/weather.png' %}" width="30" height="30"
+                class="d-inline-block align-top" alt=""> Kinewell Weather
+        </a>
+    </nav>
+
+    <div class="container-fluid" style="height: 300px; width: 100%; background-color: deepskyblue">
+        <div class="row" >
+            {% if country %}
+                <img src="https://openweathermap.org/img/wn/{{ icon }}.png" class="img-fluid mx-auto d-block mt-4" alt="Logo" style="max-width: 200px; width: 100%;">
+      
+            {% else %}
+                <img src="{% static 'images/logo.png' %}" class="img-fluid mx-auto d-block mt-4" alt="Logo" style="max-width: 200px;">
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <form method="post" class="col-sm-8 col-md-6 col-lg-4">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" class="form-control" id="cityInput" name="city" placeholder="City">
+                    <div class="input-group-append">
+                        <button type="submit" name="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+                <!-- Autocomplete list -->
+                <div class="autocomplete-list" id="autocompleteList"></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            {% if error_message %}
+    <p class="text-danger" >{{ error_message }}</p>
+{% endif %}
+            {% if country and coordinates and temperature and humidity %}
+                <div class="col-md-6">
+                    <div class="weather-info bg-light p-3 rounded">
+                        <h4 id="city_details" data-city="{{ city }}"><span class="text-info font-weight-bold">Country Code:</span>{{ city }} , {{ country }}</h4>
+                        <h4><span class="text-info font-weight-bold">Pressure:</span> {{ pressure }}</h4>
+                        <h4><span class="text-info font-weight-bold">Temperature:</span> {{ temperature }}</h4>
+</div>
+</div>
+            <div class="col-md-6">
+                <div class="weather-info bg-light p-3 rounded">
+                    <h4><span class="text-info font-weight-bold">Humidity:</span> {{ humidity }}</h4>
+                    <h4><span class="text-info font-weight-bold">Forecast:</span> {{ forecast }}</h4>
+                    <h4><span class="text-info font-weight-bold">Description:</span> {{ description }}</h4>
+                </div>
+
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="content mt-4 text-center">
+        <!-- Conditionally show the button only if city data is available -->
+        {% if city %}
+            <button type="submit" onclick="fullDetails()" name="full_details" class="btn btn-primary mx-auto">View Full Details</button>
+        {% endif %}
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#cityInput").on("input", function () {
+                var inputVal = $(this).val().toLowerCase();
+                var autocompleteList = $("#autocompleteList");
+
+                // Clear previous suggestions
+                autocompleteList.empty();
+
+                // Fetch city suggestions from OpenWeatherMap API
+                $.ajax({
+                    url: "https://api.openweathermap.org/data/2.5/find",
+                    data: {
+                        q: inputVal,
+                        type: "like",
+                        sort: "population",
+                        cnt: 5,
+                        appid: "0ac45593d4c7e3c1638e35f610b3fcf9"  
+                    },
+                    success: function (data) {
+                        // Display matching cities in autocomplete list
+                        data.list.forEach(function (city) {
+                            var autocompleteItem = $("<div class='autocomplete-item'>" + city.name + ", " + city.sys.country + "</div>");
+
+                            // Click event for selecting a city
+                            autocompleteItem.on("click", function () {
+                                $("#cityInput").val(city.name);
+                                autocompleteList.empty(); // Hide autocomplete list
+                            });
+
+                            autocompleteList.append(autocompleteItem);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching city suggestions: ", error);
+                    }
+                });
+            });
+        });
+    </script>
+    
+    
+    <script>
+        function fullDetails() {
+            var cityName = document.getElementById("city_details").getAttribute("data-city");
+            window.location.href = "{% url 'full_details' %}?cityName=" + encodeURIComponent(cityName);
+        };
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Details</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Custom styling for h1 tag */
+        h1 {
+            color: #ffffff; /* White text color */
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #007bff; /* Blue background color */
+            padding: 15px; /* Add padding for better visibility */
+            border-radius: 10px; /* Add rounded corners for a softer look */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 >Weather Details for {{ city }}, {{ country }}</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body" style="background-color: aliceblue">
+                    
+                    <h5 class="card-title" class="title" style="color: #007bff">Current Weather</h5>
+                    <p class="card-text"><strong>Temperature:</strong> {{ temperature }}</p>
+                    <p class="card-text"><strong>Min Temperature:</strong> {{ temperature_min }}</p>
+                    <p class="card-text"><strong>Max Temperature:</strong> {{ temperature_max }}</p>
+                    <p class="card-text"><strong>Humidity:</strong> {{ humidity }}%</p>
+                    <p class="card-text"><strong>Wind Speed:</strong> {{ wind_speed }} m/s</p>
+                    <p class="card-text"><strong>Cloudiness:</strong> {{ clouds }}%</p>
+                    <p class="card-text"><strong>Forecast:</strong> {{ forecast }}</p>
+                    <p class="card-text"><strong>Description:</strong> {{ description }}</p>
+                    <p id="sunrise" class="card-text"><strong>Sunrise:</strong></p>
+                    <p id="sunset" class="card-text"><strong>Sunset:</strong></p>
+
+                    
+                    <p class="card-text"><i class="fas fa-sun"></i><strong> Weather Icon:</strong> <img src="https://openweathermap.org/img/wn/{{ icon }}.png" class="weather-icon" alt="Weather Icon"></p>
+
+                    <!-- Go Back button -->
+                    <a href="{% url 'index' %}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Go Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+   
+    function formatTime(timestamp) {
+        const date = new Date(timestamp * 1000); 
+        return date.toLocaleTimeString(); 
+    }
+
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        const sunriseElement = document.getElementById("sunrise");
+        const sunsetElement = document.getElementById("sunset");
+
+        if (sunriseElement) {
+            const sunriseTimestamp = {{ sunrise }};
+            sunriseElement.innerHTML = '<strong>Sunrise:</strong> ' + formatTime(sunriseTimestamp);
+        }
+
+        if (sunsetElement) {
+            const sunsetTimestamp = {{ sunset }};
+            sunsetElement.innerHTML = '<strong>Sunset:</strong> ' + formatTime(sunsetTimestamp);
+        }
+    });
+</script>
+
+</body>
+</html>
